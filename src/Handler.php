@@ -40,6 +40,12 @@ final class Handler extends BaseHandlerWithClient {
 			/** @var Client $client */
 			$ex = explode(' ', $payload->query);
 			$table = $ex[2];
+			$ex = explode(':', $table);
+			$cluster = '';
+			if (sizeof($ex) > 1) {
+				$cluster = $ex[0];
+				$table = $ex[1];
+			}
 			$res = $client->sendRequest("SHOW CREATE TABLE $table")->getResult();
 			$tableSchema = $res[0]['data'][0]['Create Table'] ?? '';
 			if (!str_contains($tableSchema, "type='distributed'")) {
@@ -54,7 +60,7 @@ final class Handler extends BaseHandlerWithClient {
 			$locals = array_filter($m['local']);
 			foreach ($locals as $t) {
 				$tables[] = [
-					'name' => $t,
+					'name' => $cluster ? "$cluster:$t" : $t,
 					'url' => '',
 				];
 			}
@@ -65,7 +71,7 @@ final class Handler extends BaseHandlerWithClient {
 				$port = (int)strtok(':');
 				$t = strtok(':');
 				$tables[] = [
-					'name' => $t,
+					'name' => $cluster ? "$cluster:$t" : $t,
 					'url' => "$host:$port",
 				];
 			}
@@ -79,7 +85,7 @@ final class Handler extends BaseHandlerWithClient {
 				$client->setServerUrl($info['url']);
 			}
 			$query = str_ireplace(
-				"insert into $table",
+				'insert into ' . ($cluster ? "$cluster:$table" : $table),
 				"insert into {$info['name']}",
 				$payload->query
 			);
