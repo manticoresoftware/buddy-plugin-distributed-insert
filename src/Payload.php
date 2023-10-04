@@ -8,7 +8,7 @@
   version. You should have received a copy of the GPL license along with this
   program; if you did not, you can find it at http://www.gnu.org/
 */
-namespace Manticoresearch\Buddy\Plugin\Template;
+namespace Manticoresearch\Buddy\Plugin\DistributedInsert;
 
 use Manticoresearch\Buddy\Core\Network\Request;
 use Manticoresearch\Buddy\Core\Plugin\BasePayload;
@@ -19,7 +19,7 @@ use Manticoresearch\Buddy\Core\Plugin\BasePayload;
  */
 final class Payload extends BasePayload {
 	public string $path;
-
+	public string $query;
   /**
 	 * @param Request $request
 	 * @return static
@@ -29,6 +29,7 @@ final class Payload extends BasePayload {
 		// TODO: add logic of parsing request into payload here
 		// We just need to do something, but actually its' just for PHPstan
 		$self->path = $request->path;
+		$self->query = $request->payload;
 		return $self;
 	}
 
@@ -37,7 +38,7 @@ final class Payload extends BasePayload {
 	 * @return bool
 	 */
 	public static function hasMatch(Request $request): bool {
-		// TODO: validate $request->payload and return true, if your plugin should handle it
-		return $request->payload === 'template';
+		return stripos($request->payload, 'insert') === 0
+			&& stripos($request->error, 'does not support INSERT');
 	}
 }
