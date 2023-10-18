@@ -10,10 +10,10 @@
 */
 namespace Manticoresearch\Buddy\Plugin\DistributedInsert;
 
+use Manticoresearch\Buddy\Core\ManticoreSearch\Client;
 use Manticoresearch\Buddy\Core\Plugin\BaseHandlerWithClient;
 use Manticoresearch\Buddy\Core\Task\Task;
 use Manticoresearch\Buddy\Core\Task\TaskResult;
-use Manticoresearch\Buddy\Core\ManticoreSearch\Client;
 use RuntimeException;
 
 final class Handler extends BaseHandlerWithClient {
