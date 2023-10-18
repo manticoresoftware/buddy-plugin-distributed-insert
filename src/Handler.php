@@ -15,7 +15,6 @@ use Manticoresearch\Buddy\Core\Task\Task;
 use Manticoresearch\Buddy\Core\Task\TaskResult;
 use Manticoresearch\Buddy\Core\ManticoreSearch\Client;
 use RuntimeException;
-use parallel\Runtime;
 
 final class Handler extends BaseHandlerWithClient {
 	/**
@@ -33,11 +32,8 @@ final class Handler extends BaseHandlerWithClient {
 	 * @return Task
 	 * @throws RuntimeException
 	 */
-	public function run(Runtime $runtime): Task {
-		$taskFn = static function (string $args): TaskResult {
-			[$payload, $client] = unserialize($args);
-			/** @var Payload $payload */
-			/** @var Client $client */
+	public function run(): Task {
+		$taskFn = static function (Payload $payload, Client $client): TaskResult {
 			$ex = explode(' ', $payload->query);
 			$table = $ex[2];
 			$ex = explode(':', $table);
@@ -94,8 +90,8 @@ final class Handler extends BaseHandlerWithClient {
 			return TaskResult::raw($response);
 		};
 
-		return Task::createInRuntime(
-			$runtime, $taskFn, [serialize([$this->payload, $this->manticoreClient])]
+		return Task::create(
+			$taskFn, [$this->payload, $this->manticoreClient]
 		)->run();
 	}
 }
